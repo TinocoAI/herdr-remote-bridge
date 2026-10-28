@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+PY="${PYTHON:-}"
+if [ -z "$PY" ]; then PY="$(command -v python3 || command -v python || echo python3)"; fi
+exec "$PY" "$(dirname "$0")/../src/bridge.py" "$@"

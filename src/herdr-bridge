@@ -1,0 +1,38 @@
+#!/usr/bin/env python3
+"""Authenticate a one-use Herdr bridge token or hold its reverse tunnel."""
+import getpass
+import hashlib
+import pathlib
+import sys
+import time
+
+if len(sys.argv) != 3 or sys.argv[1] not in {"auth", "hold"}:
+    print("usage: herdr-bridge auth|hold <session>", file=sys.stderr)
+    raise SystemExit(2)
+
+mode, session = sys.argv[1:]
+base = pathlib.Path(f"/tmp/herdr-bridge-{session}")
+hash_path = base.with_suffix(".sha256")
+accepted_path = base.with_suffix(".accepted")
+
+if mode == "auth":
+    try:
+        expected = hash_path.read_text().strip()
+    except OSError:
+        print("bridge session not found or expired", file=sys.stderr)
+        raise SystemExit(1)
+    token = getpass.getpass("Herdr token: ")
+    hash_path.unlink(missing_ok=True)
+    if not expected or hashlib.sha256(token.encode()).hexdigest() != expected:
+        print("rejected", file=sys.stderr)
+        raise SystemExit(1)
+    accepted_path.touch(mode=0o600, exist_ok=True)
+    print("accepted", flush=True)
+    raise SystemExit(0)
+
+if not accepted_path.exists():
+    print("bridge authentication missing", file=sys.stderr)
+    raise SystemExit(1)
+accepted_path.unlink(missing_ok=True)
+print("bridge established", flush=True)
+time.sleep(10**9)

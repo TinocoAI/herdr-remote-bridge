@@ -1,0 +1,24 @@
+id = "herdr-remote-bridge"
+name = "Herdr Remote Bridge"
+version = "0.1.0"
+min_herdr_version = "0.8.0"
+description = "On-demand reverse SSH bridge from a browser-only remote machine"
+platforms = ["macos", "linux"]
+
+[[panes]]
+id = "wait"
+title = "Remote Bridge — waiting"
+placement = "popup"
+command = ["./bin/run", "pane"]
+
+[[actions]]
+id = "connect"
+title = "Connect browser-only remote machine"
+contexts = ["pane"]
+command = ["./bin/run", "action"]
+
+[[keys.command]]
+key = "prefix+alt+r"
+type = "plugin_action"
+command = "herdr-remote-bridge.connect"
+description = "wait for a browser-only remote SSH bridge"
